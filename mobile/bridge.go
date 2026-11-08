@@ -3,11 +3,6 @@
 // Local API (ADR 0002) to the shell: Call goes through rpc.Client against the
 // owner's own socket, so roles, audit and redaction apply unchanged.
 //
-// SKETCH — written against the signatures read from the repo on 2026-11-08
-// (core.New/core.Options in core/service.go, rpcbind.Listen in rpcbind/bind.go,
-// rpc.Dial and Client.Call in rpc/, Service.Subscribe in core/service.go).
-// It has not been compiled. Fix it against the tree before binding.
-//
 // gomobile bind restrictions: exported functions may use basic types, string,
 // []byte, error, and Go interfaces whose methods use those. Everything richer
 // is JSON — which is what the Local API is anyway.
@@ -18,6 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/godwit-email/godwit/core"
@@ -89,12 +85,17 @@ func Start(dataDir, systemLanguage, appVersion string, h Host) error {
 	}
 	host = h
 
-	// The mygo sqlite plugin dlopens the library named here (purego). iOS ships
-	// libsqlite3 in the dyld shared cache; apps link it all the time. Verify
-	// FTS5 during the spike (PRAGMA compile_options). Fallback: an embedded
-	// framework built from mygo/plugins/sqlite/native/sqlite.c.
+	// The mygo sqlite plugin dlopens its own build (SQLite plus the mygo_sqlite_*
+	// shims in plugins/sqlite/native) and refuses any other library, so the
+	// system libsqlite3 cannot stand in. The app embeds it as
+	// MygoSQLite.framework beside its executable. Set here, not from Swift:
+	// Go reads the environment once at start, before the shell runs.
 	if os.Getenv("MYGO_SQLITE_LIBRARY") == "" {
-		_ = os.Setenv("MYGO_SQLITE_LIBRARY", "/usr/lib/libsqlite3.dylib")
+		exe, err := os.Executable()
+		if err != nil {
+			return err
+		}
+		_ = os.Setenv("MYGO_SQLITE_LIBRARY", filepath.Join(filepath.Dir(exe), "Frameworks", "MygoSQLite.framework", "MygoSQLite"))
 	}
 
 	ctx, c := context.WithCancel(context.Background())
