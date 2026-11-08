@@ -17,7 +17,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/url"
 	"os"
 	"sync"
 
@@ -109,7 +108,6 @@ func Start(dataDir, systemLanguage, appVersion string, h Host) error {
 		Registry:       nil, // plugin directory off on iOS v1
 		// internal/sysproxy's darwin path uses CFNetworkCopySystemProxySettings,
 		// which exists on iOS; keep nil to try it, or return nil here to bypass.
-		SystemProxy: func(*url.URL) *url.URL { return nil },
 		// Keyring: the shell's keychain (seam patch 0001). nil would mean
 		// go-keyring, which shells out to /usr/bin/security and cannot work here.
 		Keyring: hostKeyring{h},
