@@ -52,12 +52,18 @@ require (
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/mobile v0.0.0-20260908204917-8b95e45f8d3e // indirect
+	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 )
 
 ignore ./web/node_modules
 
-tool github.com/egoist/mygo/cmd/mygo
+tool (
+	github.com/egoist/mygo/cmd/mygo
+	golang.org/x/mobile/cmd/gobind
+)
 
 replace github.com/emersion/go-imap/v2 => github.com/godwit-email/go-imap/v2 v2.0.0-beta.8.godwit.6
