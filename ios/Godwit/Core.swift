@@ -51,7 +51,14 @@ final class KeychainHost: NSObject, MobileHostProtocol {
         guard status == errSecSuccess || status == errSecItemNotFound else { throw failure(status) }
     }
 
-    func log(_ line: String?) { coreLog.info("\(line ?? "", privacy: .public)") }
+    // Core lines can carry addresses and server names: public only in debug builds.
+    func log(_ line: String?) {
+        #if DEBUG
+        coreLog.info("\(line ?? "", privacy: .public)")
+        #else
+        coreLog.info("\(line ?? "", privacy: .private)")
+        #endif
+    }
 }
 
 final class EventSink: NSObject, MobileEventSinkProtocol {
@@ -130,7 +137,7 @@ enum Core {
             var err: NSError?
             let res = MobileCall(method, paramsJSON, &err)
             if let err {
-                coreLog.error("\(method, privacy: .public): \(err.localizedDescription, privacy: .public)")
+                coreLog.error("\(method, privacy: .public): \(err.localizedDescription, privacy: .private)")
                 throw CoreError(method: method, message: err.localizedDescription)
             }
             return Data(res.utf8)

@@ -64,8 +64,11 @@ struct MessageBodyView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            if action.navigationType == .linkActivated, let url = action.request.url {
-                UIApplication.shared.open(url)
+            if action.navigationType == .linkActivated {
+                // Mail is untrusted: only web and mailto links leave the app, never another app's scheme.
+                if let url = action.request.url, ["http", "https", "mailto"].contains(url.scheme?.lowercased() ?? "") {
+                    UIApplication.shared.open(url)
+                }
                 decisionHandler(.cancel)
                 return
             }
