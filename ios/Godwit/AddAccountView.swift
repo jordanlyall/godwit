@@ -97,6 +97,11 @@ struct AddAccountView: View {
         }
         .navigationTitle("Add account")
         .onChange(of: email) { provider = nil }
+        // Look up the servers once typing pauses, not only on Return.
+        .task(id: email) {
+            try? await Task.sleep(for: .milliseconds(700))
+            if !Task.isCancelled { await detect() }
+        }
     }
 
     private var passwordLabel: String {
@@ -126,7 +131,7 @@ struct AddAccountView: View {
 
     private func detect() async {
         let addr = email.trimmingCharacters(in: .whitespaces)
-        guard addr.contains("@"), provider == nil else { return }
+        guard let at = addr.firstIndex(of: "@"), addr[at...].contains("."), provider == nil else { return }
         detecting = true
         defer { detecting = false }
         // DetectProvider returns [Provider, Source].
