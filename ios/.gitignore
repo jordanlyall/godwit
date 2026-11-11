@@ -1,0 +1,5 @@
+Godwit.xcframework/
+MygoSQLite.xcframework/
+build-sqlite/
+build/
+*.xcodeproj/
